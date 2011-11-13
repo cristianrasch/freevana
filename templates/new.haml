@@ -2,8 +2,8 @@
 %html
   %head
     %meta{charset: "utf-8"}
-    %title Cuevana to Megaupload
-    %meta{name: "description", content: "Cuevana to Megaupload link grabber"}
+    %title Freevana :: Cuevana to Megaupload
+    %meta{name: "description", content: "Transform your Cuevana's streaming links into even faster Megaupload downloads"}
     %meta{name: "author", content: "Cristian Rasch"}
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -72,7 +72,7 @@
     .topbar
       .fill
         .container
-          %a.brand{href: "#"} Cuevana to Megaupload
+          %a.brand{href: "#"} Freevana
           %ul.nav
             %li.active <a href="#">Home</a>
             /
@@ -83,15 +83,16 @@
 
       .content
         .page-header
-          %h1 Don't stream flash videos! <small>download directly from Megaupload :P</small>
+          %h1 Don't stream flash videos! <small>download mp4 files directly from Megaupload :P</small>
         .row
           .span10
-            %h2 Make the most out of your broadband connection & CPU(s)
+            %h2 Transform your Cuevana's streaming links into even faster Megaupload HTTP downloads
             
             %form.cuevana{action: 'new', method: 'post'}
               %p
-                Cuevana URL
-                %input{type: 'text', name: 'url', size: 50}
+                URL
+                %input{type: 'text', name: 'url', size: 70, 
+                       placeholder: 'http://www.cuevana.tv/peliculas/1729/ghostbusters-ghost-busters/'}
                 %input{type: 'submit', value: 'Download'}
               
               - if block_given?
