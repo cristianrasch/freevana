@@ -16,7 +16,7 @@ Cuba.define do
     
     on 'styles', extension('css') do |file|
       res['Content-Type'] = 'text/css'
-      res.write File.open(File.join(File.dirname(__FILE__), 'styles', "#{file}.css")).read
+      res.write render_stylesheet(file)
     end
   end
   
@@ -59,3 +59,11 @@ def render_template(template, error=nil)
     Tilt.new("templates/#{template}.haml").render
   end
 end
+
+def render_stylesheet(stylesheet)
+  @@stylesheets_cache ||= Tilt::Cache.new
+  @@stylesheets_cache.fetch(stylesheet) do
+    File.open(File.join(File.dirname(__FILE__), 'styles', "#{stylesheet}.css")).read
+  end
+end
+
