@@ -21,9 +21,15 @@ Cuba.define do
   end
   
   on post do
-    on 'new', param('url') do |cuevana_url|
-      if cuevana_url  =~ URI::regexp
-        res.redirect megaupload_url(cuevana_url)
+    on 'new', param('url') do |url|
+      if valid_url?(url)
+        mega_url = megaupload_url(url)
+        
+        if valid_url?(mega_url)
+          res.redirect mega_url
+        else
+          res.write render_template('new', mega_url)
+        end
       else
         res.write render_template('new', 'You need to provide a valid URL!')
       end
@@ -35,21 +41,43 @@ Cuba.define do
   end
 end
 
-def megaupload_url(cuevana_url)
-  id = cuevana_url.match(/\d+/).to_s
-  doc = Nokogiri::HTML(open(cuevana_url))
-  query_string = doc.at_css('#videoi').text
+def megaupload_url(url)
+  doc = Nokogiri::HTML(open(url))
+  q_string_div = doc.at_css('#videoi')
+  
+  if q_string_div
+    query_string = q_string_div.text
+    id = query_string.match(/\Aid=(\d+)/).captures.first
+    doc = Nokogiri::HTML(open("#{iframe_url(url)}?#{query_string}"))
+    script = doc.at_css('#sources ul').text
+    key = script[/goSource\('(.+)',\s?'megaupload'\)/, 1]
 
-  doc = Nokogiri::HTML(open("http://www.cuevana.tv/player/source?#{query_string}"))
-  script = doc.at_css('#sources ul').text
+    # curl -d "key=d7d7b724c13637e667ffcc83fce4b8ba" -d "host=megaupload"
+    #        -d "vars=id=4290" http://www.cuevana.tv/player/source_get
 
-  key = script[/goSource\('(.+)','megaupload'\)/, 1]
+    uri = URI(source_url(url))
+    Net::HTTP.post_form(uri, key: key, host: 'megaupload', vars: "&id=#{id}").body[/http.+/]
+  else
+    'Streaming site unsupported!'
+  end
+end
 
-  # curl -d "key=d7d7b724c13637e667ffcc83fce4b8ba" -d "host=megaupload"
-  #        -d "vars=id=4290" http://www.cuevana.tv/player/source_get
+def valid_url?(url)
+  url  =~ URI::regexp
+end
 
-  uri = URI('http://www.cuevana.tv/player/source_get')
-  Net::HTTP.post_form(uri, key: key, host: 'megaupload', vars: "&id=#{id}").body[/http.+/]
+def iframe_url(url)
+  case url
+  when /cuevana.tv/ then 'http://www.cuevana.tv/player/source'
+  when /peliplay.com/ then 'http://www.peliplay.com/wp-content/plugins/streaming/video.php'
+  end
+end
+
+def source_url(url)
+  case url
+  when /cuevana.tv/ then 'http://www.cuevana.tv/player/source_get'
+  when /peliplay.com/ then 'http://www.peliplay.com/wp-content/plugins/streaming/get.php'
+  end
 end
 
 def render_template(template, error=nil)
@@ -61,9 +89,9 @@ def render_template(template, error=nil)
 end
 
 def render_stylesheet(stylesheet)
-  @@stylesheets_cache ||= Tilt::Cache.new
-  @@stylesheets_cache.fetch(stylesheet) do
+  # @@stylesheets_cache ||= Tilt::Cache.new
+  # @@stylesheets_cache.fetch(stylesheet) do
     File.open(File.join(File.dirname(__FILE__), 'styles', "#{stylesheet}.css")).read
-  end
+  # end
 end
 
