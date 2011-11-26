@@ -95,15 +95,14 @@
               %li
                 %a{href: 'http://www.peliplay.com/', target: '_blank'} Peliplay
             
-            %form.cuevana{action: 'new', method: 'post'}
-              %p
-                URL
-                %input{type: 'text', name: 'url', size: 70, 
-                       placeholder: 'http://www.cuevana.tv/peliculas/1729/ghostbusters-ghost-busters/'}
-                %input{type: 'submit', class: 'btn', value: 'Download'}
-              
-              - if block_given?
-                %p.error= yield
+            %p.url
+              URL
+              %input{type: 'text', name: 'url', size: 70, id: 'url',
+                     placeholder: 'http://www.cuevana.tv/peliculas/1729/ghostbusters-ghost-busters/'}
+              %input{type: 'submit', class: 'btn', value: 'Download'}
+              %img#wheel{src: 'images/wheel.gif'}
+            
+            %p.error
             
           /
             .span4
@@ -114,4 +113,22 @@
           &copy;
           %a{href: 'https://twitter.com/#!/cristianrasch', target: '_blank'} Cristian Rasch
           = Date.today.year
+    
+    %script{src: "http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"}
+    :javascript
+      $('input.btn').click(function() {
+        var wheel = $('#wheel')
+        wheel.css('visibility', 'visible');
+        var submitBtn = $(this)
+        submitBtn.attr('disabled', 'disabled');
         
+        $.post('new', { url: $('#url').val() }, function(data) {
+          if(/http/.exec(data))
+            window.location = data;
+          else {
+            $('.error').html(data);
+            submitBtn.removeAttr('disabled');
+          }
+          wheel.css('visibility', 'hidden');
+        });
+      });
