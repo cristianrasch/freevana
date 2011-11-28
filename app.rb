@@ -10,9 +10,7 @@ Cuba.define do
     on '' do
       res.write render_template('new')
     end
-  end
-  
-  on post do
+    
     on 'new', param('url') do |url|
       if valid_url?(url)
         res.write megaupload_url(url)
