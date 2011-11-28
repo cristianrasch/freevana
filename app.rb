@@ -1,28 +1,29 @@
 Dir['./lib/**/*.rb'].each { |rb| require rb }
 
-include URLHelper
 include ViewHelper
 
 Cuba.use Rack::Static, root: 'public', urls: ['/css', '/images']
 
 Cuba.define do
   on get do
-    on '' do
-      res.write render_template('index')
+    on 'cuevana', param('url') do |url|
+      res.headers['Content-Type'] = 'application/json'
+      sources = CuevanaHelper.new.sources(CGI.unescape(url))
+      res.write JSON.generate(sources)
     end
     
-    on 'index', param('url') do |url|
-      u = CGI.unescape(url)
-      
-      if valid_url?(u)
-        res.write megaupload_url(u)
-      else
-        res.write 'You need to provide a valid URL!'
-      end
+    on 'peliplay', param('url') do |url|
+      res.write PeliPlayHelper.new.source_url(url)
     end
     
     on true do
-      res.write 'You need to provide a URL!'
+      res.write render_template('index')
+    end
+  end
+  
+  on post do
+    on 'cuevana', param('def'), param('audio'), param('host'), param('id'), param('type') do |definition, audio, host, id, type|
+      res.write CuevanaHelper.new.source_url(definition, audio, host, id, type)
     end
   end
 end
