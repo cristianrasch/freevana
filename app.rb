@@ -2,7 +2,7 @@ Dir['./lib/**/*.rb'].each { |rb| require rb }
 
 include ViewHelper
 
-Cuba.use Rack::Static, root: 'public', urls: ['/css', '/images']
+Cuba.use Rack::Static, root: 'public', urls: ['/css', '/images', '/js']
 
 Cuba.define do
   on get do
