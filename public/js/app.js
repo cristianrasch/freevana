@@ -1,6 +1,7 @@
 function showError(err) {
   $('p.results').text('');
   $('p.error').text(err);
+  $('p.sub').html('');
 }
 
 function fetchSources(url) {
@@ -44,6 +45,9 @@ function fetchSources(url) {
         ul.append(e);
       });
       $('p.results').html(ul);
+      
+      var subLink = $('<a href="http://sc.cuevana.tv/files/sub/'+metadata.id+'_ES.srt">Spanish subtitle</a>');
+      $('p.sub').html(subLink);
     }
     
     $('input.btn').removeAttr('disabled');
